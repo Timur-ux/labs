@@ -1,14 +1,18 @@
+flags ?=
 libdir ?= build
-src = $(wildcard ./src/*.c)
-objects = $(patsubst ./src/%.c,$(libdir)/objects/%.o,$(src))
+sources = $(wildcard ./src/*.c)
+objects = $(patsubst ./src/%.c,$(libdir)/%.o,$(sources)) # что меняем,на что меняем,где меняем
 
-all: $(libdir)/objects lib
+all: $(libdir) $(libdir)/liblabs.a $(libdir)/liblabs.so
 
-lib: $(objects)
-	ar rcs $(libdir)/liblabs.a $^ 
+$(libdir)/liblabs.a: $(objects)
+	ar rcs $@ $^
 
-$(libdir)/objects:
-	mkdir -p $(libdir)/objects
+$(libdir)/liblabs.so: $(objects)
+	gcc -shared $^ -o $@ $(flags)
 
-$(libdir)/objects/%.o: ./src/%.c
-	gcc -c $< -o $@ -I./include
+$(libdir)/%.o: ./src/%.c
+	gcc -c $< -o $@ -Iinclude -fPIC $(flags)
+
+$(libdir):
+	mkdir -p $(libdir)
