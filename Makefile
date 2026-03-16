@@ -3,12 +3,12 @@ libdir ?= build
 sources = $(wildcard ./src/*.c)
 objects = $(patsubst ./src/%.c,$(libdir)/%.o,$(sources)) # что меняем,на что меняем,где меняем
 
-all: $(libdir) $(libdir)/liblabs.a $(libdir)/liblabs.so
+all: $(libdir) $(libdir)/liblabs-static.a $(libdir)/liblabs-shared.so
 
-$(libdir)/liblabs.a: $(objects)
+$(libdir)/liblabs-static.a: $(objects)
 	ar rcs $@ $^
 
-$(libdir)/liblabs.so: $(objects)
+$(libdir)/liblabs-shared.so: $(objects)
 	gcc -shared $^ -o $@ $(flags)
 
 $(libdir)/%.o: ./src/%.c

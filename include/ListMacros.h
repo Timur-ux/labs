@@ -19,24 +19,27 @@
     alias##Item *item;                                                         \
   } alias##Iterator;                                                           \
                                                                                \
-  static inline alias *alias##_create();                                                     \
-  static inline void alias##_destroy(alias *l);                                              \
+  static inline alias *alias##_create();                                       \
+  static inline void alias##_destroy(alias *l);                                \
                                                                                \
-  static inline size_t alias##_size(alias *l);                                               \
-  static inline bool alias##_empty(alias *l);                                                \
+  static inline size_t alias##_size(alias *l);                                 \
+  static inline bool alias##_empty(alias *l);                                  \
                                                                                \
-  static inline alias##Iterator alias##_insert(alias *l, alias##Iterator it, T data);        \
-  static inline alias##Iterator alias##_remove(alias *l, alias##Iterator it);                \
+  static inline alias##Iterator alias##_insert(alias *l, alias##Iterator it,   \
+                                               T data);                        \
+  static inline alias##Iterator alias##_remove(alias *l, alias##Iterator it);  \
                                                                                \
-  static inline void alias##_swap(alias *l, alias##Iterator it1, alias##Iterator it2);       \
+  static inline void alias##_swap(alias *l, alias##Iterator it1,               \
+                                  alias##Iterator it2);                        \
                                                                                \
-  static inline alias##Iterator alias##_begin(alias *l);                                     \
-  static inline alias##Iterator alias##_end(alias *l);                                       \
+  static inline alias##Iterator alias##_begin(alias *l);                       \
+  static inline alias##Iterator alias##_end(alias *l);                         \
                                                                                \
-  static inline alias##Iterator alias##Iterator_next(alias##Iterator it);                    \
-  static inline alias##Iterator alias##Iterator_prev(alias##Iterator it);                    \
-  static inline bool alias##Iterator_equal(alias##Iterator lhs, alias##Iterator rhs);        \
-  static inline T *alias##Iterator_get(alias##Iterator it);                                  \
+  static inline alias##Iterator alias##Iterator_next(alias##Iterator it);      \
+  static inline alias##Iterator alias##Iterator_prev(alias##Iterator it);      \
+  static inline bool alias##Iterator_equal(alias##Iterator lhs,                \
+                                           alias##Iterator rhs);               \
+  static inline T *alias##Iterator_get(alias##Iterator it);                    \
                                                                                \
   alias *alias##_create() {                                                    \
     alias *l = (alias *)malloc(sizeof(alias));                                 \

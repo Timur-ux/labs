@@ -73,13 +73,12 @@ ListIterator List_remove(List *l, ListIterator it) {
 }
 
 void List_swap(List *l, ListIterator it1, ListIterator it2) {
-  void *temp = malloc(l->elementSize);
+  char temp[l->elementSize];
 
   memcpy(temp, it1.item->data, l->elementSize); // temp = it1.item.data;
   memcpy(it1.item->data, it2.item->data,
          l->elementSize);                       // it1.item.data = it2.item.data
   memcpy(it2.item->data, temp, l->elementSize); // it2.item.data = temp;
-  free(temp);
 }
 
 ListIterator List_begin(List *l) {
