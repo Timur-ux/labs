@@ -1,6 +1,7 @@
 #include "BinTree.h"
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct Node {
 	double value;
@@ -18,7 +19,19 @@ BinTree * BinTree_create() {
 	return tree;
 }
 
-void Node_destroy(Node *node);
+void Node_free(Node *node) {
+	// Здесь корректно уничтожается отдельный узел и его данные
+	free(node);
+}
+
+void Node_destroy(Node *node) {
+	if(!node)
+		return;
+	Node_destroy(node->left);
+	Node_destroy(node->right);
+	Node_free(node);
+}
+
 void BinTree_destroy(BinTree *tree) {
 	Node_destroy(tree->root);
 	free(tree);
@@ -67,7 +80,7 @@ Node * Node_insertRecurse(Node * node, double value) {
 	if(node->value == value)
 		return node;
 
-	if(node->value > value) 
+	if(node->value > value)
 			node->left = Node_insertRecurse(node->left, value);
 	else
 		node->right = Node_insertRecurse(node->right, value);
@@ -79,7 +92,107 @@ void BinTree_insert(BinTree *tree, double value) {
 	tree->root = Node_insertRecurse(tree->root, value);
 }
 
+bool Node_isHaveBothChildren(Node *node) { 
+	return node && node->left && node->right;
+}
+
+
+void Node_parentReplaceChild(Node *parent, double value, Node *child) {
+	if(parent) {
+		if(parent->value > value)
+			parent->left = child;
+		else
+			parent->right = child;
+	}
+}
+
+void Node_remove(Node *node, double value, Node *parent) {
+	while(node && node->value != value) {
+		parent = node;
+		if(node->value > value)
+			node = node->left;
+		else
+			node = node->right;
+	}
+
+	if(!node)
+		return;
+
+	if(!Node_isHaveBothChildren(node)) {
+		Node * child = NULL;
+		if(!node->left || !node->right) 
+			child = node->left ? node->left : node->right;
+
+		Node_parentReplaceChild(parent, node->value, child);
+		Node_free(node);
+		return;
+	}
+
+	Node * right = node->right, *leftMost = right;
+	while(leftMost->left)
+		leftMost = leftMost->left;
+
+	node->value = leftMost->value;
+	Node_remove(right, leftMost->value, node);
+}
+
 void BinTree_remove(BinTree *tree, double value) {
+	Node_remove(tree->root, value, NULL);
+}
+
+void Node_print(Node *node, FILE *file, int depth) {
+	if(!node)
+		return;
+
+	Node_print(node->right, file, depth + 1);
+	for(int i = 0; i < depth; ++i) 
+		fprintf(file, "\t");
+	fprintf(file, "%lf\n", node->value);
+	Node_print(node->left, file, depth + 1);
+}
+
+void BinTree_print(BinTree * tree, FILE *file) {
+	Node_print(tree->root, file, 0);
+}
+
+BinTreeIterator BinTree_begin(BinTree * tree) {
+	BinTreeIterator result = {.item = tree->root};
+	return result;
+}
+BinTreeIterator BinTree_end(BinTree * tree) {
+	BinTreeIterator result = {.item = NULL};
+	return result;
+}
+
+bool BinTreeIterator_equal(BinTreeIterator lhs, BinTreeIterator rhs) {
+	return lhs.item == rhs.item;
+}
+
+BinTreeIterator BinTreeIterator_left(BinTreeIterator it) {
+	Node * node = (Node*)it.item;
+	if(!node)
+		return it;
+	node = node->left;
+	it.item = node;
+	return it;
+}
+BinTreeIterator BinTreeIterator_right(BinTreeIterator it) {
+	Node * node = (Node*)it.item;
+	if(!node)
+		return it;
+	node = node->right;
+	it.item = node;
+	return it;
+}
+
+double BinTreeIterator_get(BinTreeIterator it) {
+	Node * node = (Node*)it.item;
+	if(!node)
+		return 0;
+	return node->value;
 
 }
-void BinTree_print(BinTree * tree, FILE *file);
+bool BinTreeIterator_isLeaf(BinTreeIterator it) {
+	Node * node = (Node*)it.item;
+	return node && !node->left && !node->right;
+}
