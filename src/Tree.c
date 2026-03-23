@@ -19,28 +19,30 @@ struct Tree {
 Tree *Tree_create() {
   Tree *tree = (Tree *)malloc(sizeof(Tree));
   tree->root = NULL;
-  tree->rootIt.item = (NodesItem*)malloc(sizeof(NodesItem));
+  tree->rootIt.item = (NodesItem *)malloc(sizeof(NodesItem));
+  tree->rootIt.item->data = NULL;
   tree->rootIt.item->next = NULL;
   tree->rootIt.item->prev = NULL;
 
   return tree;
 }
 
-void TreeNode_destoy(TreeNode *node) {
+void TreeNode_destroy(TreeNode *node) {
   if (!node)
     return;
 
   for (NodesIterator it = Nodes_begin(node->childs);
        !NodesIterator_equal(it, Nodes_end(node->childs));
        it = NodesIterator_next(it)) {
-    TreeNode_destoy(*NodesIterator_get(it));
+    TreeNode_destroy(*NodesIterator_get(it));
   }
 
   Nodes_destroy(node->childs);
   free(node);
 }
+
 void Tree_destroy(Tree *tree) {
-  TreeNode_destoy(tree->root);
+  TreeNode_destroy(tree->root);
   free(tree->rootIt.item);
   free(tree);
 }
@@ -103,7 +105,7 @@ bool Tree_remove(Tree *tree, double value) {
   if (!node)
     return false;
 
-  TreeNode_destoy(node);
+  TreeNode_destroy(node);
   if (!parent)
     return true;
   for (NodesIterator it = Nodes_begin(parent->childs);
@@ -122,8 +124,8 @@ void TreeNode_print(TreeNode *node, FILE *file, int depth) {
     return;
 
   for (size_t i = 0; i < depth; ++i)
-    printf("\t");
-  printf("%lf\n", node->value);
+    fprintf(file, "\t");
+  fprintf(file, "%lf\n", node->value);
 
   for (NodesIterator it = Nodes_begin(node->childs);
        !NodesIterator_equal(it, Nodes_end(node->childs));
@@ -144,8 +146,8 @@ TreeIterator Tree_end(Tree *tree) {
 }
 
 double *TreeIterator_get(TreeIterator it) {
-  NodesItem * node = (NodesItem*)it.item;
-  if(!node)
+  NodesItem *node = (NodesItem *)it.item;
+  if (!node)
     return NULL;
   return &node->data->value;
 }
@@ -155,8 +157,8 @@ bool TreeIterator_equal(TreeIterator lhs, TreeIterator rhs) {
 }
 
 TreeIterator TreeIterator_childBegin(TreeIterator it) {
-  NodesItem * node = (NodesItem*)it.item;
-  if(!node)
+  NodesItem *node = (NodesItem *)it.item;
+  if (!node)
     return it;
 
   TreeIterator child = {.item = Nodes_begin(node->data->childs).item};
@@ -164,8 +166,8 @@ TreeIterator TreeIterator_childBegin(TreeIterator it) {
 }
 
 TreeIterator TreeIterator_childEnd(TreeIterator it) {
-  NodesItem * node = (NodesItem*)it.item;
-  if(!node)
+  NodesItem *node = (NodesItem *)it.item;
+  if (!node)
     return it;
 
   TreeIterator child = {.item = Nodes_end(node->data->childs).item};
@@ -173,8 +175,8 @@ TreeIterator TreeIterator_childEnd(TreeIterator it) {
 }
 
 TreeIterator TreeIterator_next(TreeIterator itChild) {
-  NodesItem *child = (NodesItem*)itChild.item;
-  if(!child)
+  NodesItem *child = (NodesItem *)itChild.item;
+  if (!child)
     return itChild;
 
   child = child->next;
