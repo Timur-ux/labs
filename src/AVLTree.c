@@ -86,7 +86,7 @@ Node* RebalanceRR(Node *node) {
 		return right;
 	}
 	Node *rightLeft = right->left;
-	rotateRight(right);
+	node->right = rotateRight(right);
 	rotateLeft(node);
 
 	if(rightLeft->balance == -1) {
