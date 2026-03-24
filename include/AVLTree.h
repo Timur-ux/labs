@@ -1,5 +1,5 @@
-#ifndef BIN_TREE_H_
-#define BIN_TREE_H_
+#ifndef AVL_TREE_H_
+#define AVL_TREE_H_
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -27,4 +27,4 @@ AVLTreeIterator AVLTreeIterator_right(AVLTreeIterator it);
 double AVLTreeIterator_get(AVLTreeIterator it);
 bool AVLTreeIterator_isLeaf(AVLTreeIterator it);
 
-#endif // !BIN_TREE_H_
+#endif // !AVL_TREE_H_

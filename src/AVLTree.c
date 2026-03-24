@@ -48,21 +48,6 @@ static inline Node* Node_create(double value) {
 	return result;
 }
 
-/*
- *		(x)2
- *				(y)-1
- *			(z)
- *
- * ---------------------------------
- *  		(x)
- *  			(z)
- *  				(y)
- *
- *
- *
- */
-
-
 Node *rotateLeft(Node *node) {
 	Node *right = node->right;
 	node->right = right->left; // x->right = beta
@@ -106,8 +91,30 @@ Node* RebalanceRR(Node *node) {
 }
 
 Node* RebalanceLL(Node *node) {
-}
+  Node * left = node->left;
+  if(left->balance == -1) {
+    rotateRight(node);
+    node->balance = 0;
+    left->balance = 0;
+    return left;
+  }
+  Node *leftRight = left->right;
+  node->left = rotateLeft(left);
+  rotateRight(node);
+  if(leftRight->balance == 1) {
+    left->balance = -1;
+    node->balance = 0;
+  } else if (leftRight->balance == 0) {
+    left->balance = 0;
+    node->balance = 0;
+  } else {
+    left->balance = 0;
+    node->balance = 1;
+  }
 
+  leftRight->balance = 0;
+  return leftRight;
+}
 
 static inline Node * Node_insertRecurse(Node * node, double value, bool *rebalanceNeed) {
 	if(node == NULL) {
@@ -201,8 +208,8 @@ static inline void Node_print(Node *node, FILE *file, int depth) {
 
 	Node_print(node->right, file, depth + 1);
 	for(int i = 0; i < depth; ++i) 
-		fprintf(file, "\t");
-	fprintf(file, "%lf\n", node->value);
+		fprintf(file, " ");
+	fprintf(file, "v = %lf; b = %d\n", node->value, node->balance);
 	Node_print(node->left, file, depth + 1);
 }
 
