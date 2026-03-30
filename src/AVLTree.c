@@ -1,5 +1,6 @@
 #include "AVLTree.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -12,6 +13,8 @@ typedef struct Node {
 struct AVLTree {
 	Node * root;
 };
+
+#define MAX(a, b) (a > b ? a : b)
 
 AVLTree * AVLTree_create() {
 	AVLTree * tree = (AVLTree*)malloc(sizeof(AVLTree));
@@ -70,6 +73,12 @@ Node* RebalanceRR(Node *node) {
 		right->balance = 0;
 		return right;
 	}
+	if(right->balance == 0) {
+		rotateLeft(node);
+		node->balance = 1;
+		right->balance = -1;
+		return right;
+	}
 	Node *rightLeft = right->left;
 	node->right = rotateRight(right);
 	rotateLeft(node);
@@ -98,6 +107,12 @@ Node* RebalanceLL(Node *node) {
     left->balance = 0;
     return left;
   }
+	if(left->balance == 0) {
+		rotateRight(node);
+		node->balance = -1;
+		left->balance = 1;
+		return left;
+	}
   Node *leftRight = left->right;
   node->left = rotateLeft(left);
   rotateRight(node);
@@ -136,7 +151,6 @@ static inline Node * Node_insertRecurse(Node * node, double value, bool *rebalan
 	}
 	if(node->balance == 0)
 		*rebalanceNeed = false;
-	// else if(node->balance == 1 || node->balance == -1) *rebalanceNeed = true;
 	else if(node->balance == 2) {
 		node = RebalanceRR(node);
 		*rebalanceNeed = false;
@@ -168,38 +182,54 @@ static inline void Node_parentReplaceChild(Node *parent, double value, Node *chi
 	}
 }
 
-static inline void Node_remove(Node *node, double value, Node *parent) {
-	while(node && node->value != value) {
-		parent = node;
-		if(node->value > value)
-			node = node->left;
-		else
-			node = node->right;
-	}
-
+static inline Node * Node_remove(Node *node, double value, Node *parent, bool *rebalanceNeed) {
 	if(!node)
-		return;
+		return NULL;
 
-	if(!Node_isHaveBothChildren(node)) {
-		Node * child = NULL;
-		if(!node->left || !node->right) 
-			child = node->left ? node->left : node->right;
+	if(node->value > value) {
+		node->left = Node_remove(node->left, value, node, rebalanceNeed);
+		if(*rebalanceNeed) 
+			node->balance += 1;
+	} else if(node->value < value) {
+		node->right = Node_remove(node->right, value, node, rebalanceNeed);
+		if(*rebalanceNeed)
+			node->balance -= 1;
+	} else {
+		if(!Node_isHaveBothChildren(node)) {
+			Node * child = node->left ? node->left : node->right;
+			Node_free(node);
+			*rebalanceNeed = true;
+			return child;
+		}
 
-		Node_parentReplaceChild(parent, node->value, child);
-		Node_free(node);
-		return;
+		Node * right = node->right, *leftMost = right;
+		while(leftMost->left)
+			leftMost = leftMost->left;
+
+		node->value = leftMost->value;
+		node->right = Node_remove(right, leftMost->value, node, rebalanceNeed);
+		if(*rebalanceNeed)
+			node->balance -= 1;
 	}
+	if(!*rebalanceNeed)
+		return node;
 
-	Node * right = node->right, *leftMost = right;
-	while(leftMost->left)
-		leftMost = leftMost->left;
+	if(node->balance == 2) 
+		node = RebalanceRR(node);
+	else if(node->balance == -2) 
+		node = RebalanceLL(node);
+	
+	if(node->balance == 1 || node->balance == -1)
+		*rebalanceNeed = false;
+	else if(node->balance == 0)
+		*rebalanceNeed = true;
 
-	node->value = leftMost->value;
-	Node_remove(right, leftMost->value, node);
+	return node;
 }
 
 void AVLTree_remove(AVLTree *tree, double value) {
-	Node_remove(tree->root, value, NULL);
+	bool rebalanceNeed = false;
+	tree->root = Node_remove(tree->root, value, NULL, &rebalanceNeed);
 }
 
 static inline void Node_print(Node *node, FILE *file, int depth) {
@@ -257,4 +287,19 @@ double AVLTreeIterator_get(AVLTreeIterator it) {
 bool AVLTreeIterator_isLeaf(AVLTreeIterator it) {
 	Node * node = (Node*)it.item;
 	return node && !node->left && !node->right;
+}
+
+int Node_validate(Node *node) {
+	if(!node)
+		return 0;
+	int hR = Node_validate(node->right);
+	int hL = Node_validate(node->left);
+	if(node->balance != (hR - hL)) 
+		fprintf(stderr, "Disbalance detected! Node value: %lf\n", node->value);
+
+	return 1 + MAX(hR, hL);
+} 
+
+void AVLTree_validate(AVLTree *tree) {
+	Node_validate(tree->root);
 }

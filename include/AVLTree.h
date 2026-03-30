@@ -27,4 +27,6 @@ AVLTreeIterator AVLTreeIterator_right(AVLTreeIterator it);
 double AVLTreeIterator_get(AVLTreeIterator it);
 bool AVLTreeIterator_isLeaf(AVLTreeIterator it);
 
+void AVLTree_validate(AVLTree *tree);
+
 #endif // !AVL_TREE_H_

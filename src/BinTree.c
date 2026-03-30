@@ -117,10 +117,7 @@ void Node_remove(Node *node, double value, Node *parent) {
     return;
 
   if (!Node_isHaveBothChildren(node)) {
-    Node *child = NULL;
-    if (!node->left || !node->right)
-      child = node->left ? node->left : node->right;
-
+    Node *child = node->left ? node->left : node->right;
     Node_parentReplaceChild(parent, node->value, child);
     Node_free(node);
     return;
@@ -144,7 +141,7 @@ void Node_print(Node *node, FILE *file, int depth) {
 
   Node_print(node->right, file, depth + 1);
   for (int i = 0; i < depth; ++i)
-    fprintf(file, "\t");
+    fprintf(file, " ");
   fprintf(file, "%lf\n", node->value);
   Node_print(node->left, file, depth + 1);
 }
@@ -157,6 +154,7 @@ BinTreeIterator BinTree_begin(BinTree *tree) {
   BinTreeIterator result = {.item = tree->root};
   return result;
 }
+
 BinTreeIterator BinTree_end(BinTree *tree) {
   BinTreeIterator result = {.item = NULL};
   return result;
