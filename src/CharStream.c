@@ -30,6 +30,7 @@ int CharStream_Get(CharStream *stream) {
 void CharStream_Put(CharStream *stream, int c) {
 	Letters_insert(stream->storage, Letters_begin(stream->storage), c);
 }
+
 void CharStream_Next(CharStream *stream) {
 	if(!Letters_empty(stream->storage)) {
 		LettersIterator it = Letters_begin(stream->storage);
