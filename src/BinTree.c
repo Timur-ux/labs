@@ -104,7 +104,7 @@ void Node_parentReplaceChild(Node *parent, double value, Node *child) {
   }
 }
 
-void Node_remove(Node *node, double value, Node *parent) {
+void Node_remove(BinTree *tree, Node *node, double value, Node *parent) {
   while (node && node->value != value) {
     parent = node;
     if (node->value > value)
@@ -120,6 +120,8 @@ void Node_remove(Node *node, double value, Node *parent) {
     Node *child = node->left ? node->left : node->right;
     Node_parentReplaceChild(parent, node->value, child);
     Node_free(node);
+		if(node == tree->root)
+			tree->root = child;
     return;
   }
 
@@ -128,11 +130,11 @@ void Node_remove(Node *node, double value, Node *parent) {
     leftMost = leftMost->left;
 
   node->value = leftMost->value;
-  Node_remove(right, leftMost->value, node);
+  Node_remove(tree, right, leftMost->value, node);
 }
 
 void BinTree_remove(BinTree *tree, double value) {
-  Node_remove(tree->root, value, NULL);
+  Node_remove(tree, tree->root, value, NULL);
 }
 
 void Node_print(Node *node, FILE *file, int depth) {

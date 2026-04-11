@@ -1,6 +1,7 @@
 #include "Token.h"
 #include "CharStream.h"
 #include "Utils.h"
+#include "sys/types.h"
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -12,16 +13,16 @@ static OpType opTypes[] = {OP_NONE,        OP_PLUS,         OP_MINUS_BINARY,
 static char opLetters[] = {'?', '+', '-', '-', '*', '/', '^', '(', ')'};
 
 void Token_Print(TokenVoid token, FILE *file) {
-	if(token.type == TOKEN_NONE)
-		fprintf(file, "<none>");
-	else if(token.type == TOKEN_NUMBER)
-		fprintf(file, "%lf", Token_GetNumber(token));
-	else if(token.type == TOKEN_VAR)
-		fprintf(file, "%c", Token_GetVar(token));
-	else if (token.type == TOKEN_OP)
-			fprintf(file, "%c", opLetters[Token_GetOp(token)]);
-	else
-		FatalError("Undefined token type!");
+  if (token.type == TOKEN_NONE)
+    fprintf(file, "<none>");
+  else if (token.type == TOKEN_NUMBER)
+    fprintf(file, "%lf", Token_GetNumber(token));
+  else if (token.type == TOKEN_VAR)
+    fprintf(file, "%c", Token_GetVar(token));
+  else if (token.type == TOKEN_OP)
+    fprintf(file, "%c", opLetters[Token_GetOp(token)]);
+  else
+    FatalError("Undefined token type!");
 }
 
 TokenVoid Token_Op(OpType op) {
@@ -110,12 +111,12 @@ TokenVoid Token_Read(CharStream *stream) {
           FatalError("Multiple dots in number not allowed!");
       }
       CharStream_Next(stream);
-			c = CharStream_Get(stream);
+      c = CharStream_Get(stream);
     }
     return prevToken = Token_Number(value);
   }
   OpType op = GetOp(c, prevToken);
-	CharStream_Next(stream);
+  CharStream_Next(stream);
   if (op != OP_NONE)
     return prevToken = Token_Op(op);
   return prevToken = Token_None();
@@ -139,11 +140,13 @@ OpType Token_GetOp(TokenVoid token) {
     FatalError("Type mismatch!");
   return *(OpType *)token.data;
 }
+
 double Token_GetNumber(TokenVoid token) {
   if (token.type != TOKEN_NUMBER)
     FatalError("Type mismatch!");
   return *(double *)token.data;
 }
+
 char Token_GetVar(TokenVoid token) {
   if (token.type != TOKEN_VAR)
     FatalError("Type mismatch!");
@@ -164,5 +167,19 @@ bool Token_Equal(TokenVoid lhs, TokenVoid rhs) {
   case TOKEN_NONE:
     return true;
   }
+
   return false;
+}
+
+TokenVoid Token_Copy(TokenVoid token) {
+  switch (token.type) {
+  case TOKEN_NUMBER:
+    return Token_Number(Token_GetNumber(token));
+  case TOKEN_VAR:
+    return Token_Var(Token_GetVar(token));
+  case TOKEN_OP:
+    return Token_Op(Token_GetOp(token));
+  default:
+    return Token_None();
+  }
 }

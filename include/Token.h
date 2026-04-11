@@ -72,6 +72,12 @@ OpType Token_GetOp(TokenVoid token);
 double Token_GetNumber(TokenVoid token);
 char Token_GetVar(TokenVoid token);
 
+TokenVoid Token_Op(OpType op);
+TokenVoid Token_Number(double number);
+TokenVoid Token_Var(char var); 
+
+TokenVoid Token_Copy(TokenVoid token);
+
 bool Token_Equal(TokenVoid lhs, TokenVoid rhs);
 
 #endif // TOKEN_H
